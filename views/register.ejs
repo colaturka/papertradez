@@ -9,17 +9,16 @@
 </head>
 <body>
     <div class="register-page">
-        <div class="form" id="registerForm">
-          <form class="register-form">
-            <input type="text" placeholder="username"/>
-            <input type="password" placeholder="password"/>
-            <input type="text" placeholder="email address"/>
-            <button>create</button>
-            <p class="message">Already registered? <a href="/loginPage">Sign In</a></p>
+        <div class="form">
+          <form id="registerForm">
+            <input type="text" id="username" placeholder="username"/>
+            <input type="password" id="password" placeholder="password"/>
+            <input type="text" id="email" placeholder="email address"/>
+            <button type="submit" id="register-btn">create</button>
+            <p class="message">Already registered? <a href="loginPage">Sign In</a></p>
           </form>
         </div>
       </div>
       <script src="/register.js"></script>
 </body>
 </html>
-
