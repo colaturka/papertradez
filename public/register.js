@@ -23,7 +23,7 @@ window.onload = function () {
       const data = await response.json();
       if (response.ok) {
           alert("Registration successful! You can now log in.");
-          window.location.href = "login.html"; // Redirect after registration
+          window.location.href = "loginPage"; // Redirect after registration
       } else {
           alert(data.error);
       }
