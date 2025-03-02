@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors()); // Allow frontend requests
 app.set("view engine", "ejs")
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
 mongoose
@@ -40,7 +40,7 @@ app.post("/register", async (req, res) => {
 
 // Login page
 app.get("/loginPage", async (req, res) => {
-  res.sendFile(path.join(__dirname, "login.html")); // Ensure index.html is in the correct location
+  res.render( "login");
 });
 
 // **Login User**
@@ -58,8 +58,8 @@ app.post("/login", async (req, res) => {
 });
 
 // register page
-app.get("/loginPage", async (req, res) => {
-  res.sendFile(path.join(__dirname, "register.html")); // Ensure index.html is in the correct location
+app.get("/registerPage", async (req, res) => {
+  res.render("register");  
 });
 
 // Start Server
