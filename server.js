@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
@@ -8,6 +9,8 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors()); // Allow frontend requests
+app.set("view engine", "ejs")
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
 mongoose
@@ -35,6 +38,11 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Login page
+app.get("/loginPage", async (req, res) => {
+  res.render( "login");
+});
+
 // **Login User**
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -47,6 +55,11 @@ app.post("/login", async (req, res) => {
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
   res.json({ message: "Login successful", token });
+});
+
+// register page
+app.get("/registerPage", async (req, res) => {
+  res.render("register");  
 });
 
 // Start Server
