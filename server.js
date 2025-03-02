@@ -45,8 +45,8 @@ app.get("/loginPage", async (req, res) => {
 
 // **Login User**
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
 
   if (!user) return res.status(400).json({ error: "User not found" });
 
@@ -62,5 +62,9 @@ app.get("/registerPage", async (req, res) => {
   res.render("register");  
 });
 
+// dashboard
+app.get("/dashboard", async (req, res) => {
+  res.render( "dashboard");
+});
 // Start Server
 app.listen(process.env.PORT, () => console.log(`✅ Server running on port ${process.env.PORT}`));
