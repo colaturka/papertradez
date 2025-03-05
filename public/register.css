@@ -1,6 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
-.register-page {
+.login-page {
   width: 360px;
   padding: 8% 0 0;
   margin: auto;
@@ -53,7 +53,7 @@
   text-decoration: none;
 }
 .form .register-form {
-  display: box;
+  display: none;
 }
 .container {
   position: relative;

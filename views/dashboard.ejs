@@ -4,10 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/login.css">
-
+    <link rel="stylesheet" href="/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js Library -->
 </head>
 <body>
 <h1>Dashboard</h1>
+<div class="dashboard">
+    <div class="box1" id="box1">
+        <canvas id="myChart"></canvas>
+        <div class="buttons">
+            <button onclick="updateChart('1D')">1 Day</button>
+            <button onclick="updateChart('1M')">1 Month</button>
+            <button onclick="updateChart('6M')">6 Months</button>
+            <button onclick="updateChart('1Y')">1 Year</button>
+            <button onclick="updateChart('ALL')">All Time</button>
+        </div>
+    </div>
+    <div class="box2" id="box2">Box 2</div>
+    <div class="box3" id="box3">Box 3</div>
+</div>
+<script>
+    // Select the canvas element inside box1
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    // Portfolio Data for different time periods
+    const allTimeData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        values: [1000, 1200, 1500, 1700, 1800, 2200, 2500, 2700, 3000, 3200, 3500, 3800]
+    };
+
+    const oneYearData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        values: [1800, 2000, 2200, 2400, 2700, 3000]
+    };
+
+    const sixMonthsData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+        values: [2000, 2200, 2500, 2800]
+    };
+
+    const oneMonthData = {
+        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+        values: [2600, 2800, 3100, 3300, 3500]
+    };
+
+    const oneDayData = {
+        labels: ['Today'],
+        values: [3500]
+    };
+
+    // Create the initial Line Chart with all-time data
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allTimeData.labels, 
+            datasets: [{
+                label: 'Portfolio Value ($)',
+                data: allTimeData.values,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: 'white',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Portfolio Value ($)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time Period'
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to update chart data based on the selected time period
+    function updateChart(timePeriod) {
+        let newData = {};
+        switch(timePeriod) {
+            case '1D':
+                newData = oneDayData;
+                break;
+            case '1M':
+                newData = oneMonthData;
+                break;
+            case '6M':
+                newData = sixMonthsData;
+                break;
+            case '1Y':
+                newData = oneYearData;
+                break;
+            case 'ALL':
+                newData = allTimeData;
+                break;
+        }
+
+        // Update the chart with new data
+        myChart.data.labels = newData.labels;
+        myChart.data.datasets[0].data = newData.values;
+        myChart.update(); // Re-render the chart with the updated data
+    }
+</script>
+
 </body>
 </html>
