@@ -24,97 +24,114 @@
     <div class="box3" id="box3">Box 3</div>
 </div>
 <script>
-    // Select the canvas element inside box1
-    const ctx = document.getElementById('myChart').getContext('2d');
+const ctx = document.getElementById('myChart').getContext('2d');
 
-    // Portfolio Data for different time periods
-    const allTimeData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        values: [1000, 1200, 1500, 1700, 1800, 2200, 2500, 2700, 3000, 3200, 3500, 3800]
-    };
+// Create a gradient background fill
+const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+gradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)');  // Light blue at top
+gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   // Transparent at bottom
 
-    const oneYearData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        values: [1800, 2000, 2200, 2400, 2700, 3000]
-    };
+// Portfolio Data for different time periods
+const portfolioData = {
+    "ALL": {
+        labels: getLastNDays(365),
+        values: [1000, 1200, 1500, 1700, 1800, 2200, 2500, 2700, 3000, 3200, 3500, 3800] // Raw values
+    },
+    "1Y": {
+        labels: getLastNDays(365),
+        values: Array.from({ length: 365 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "6M": {
+        labels: getLastNDays(180),
+        values: Array.from({ length: 180 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "1M": {
+        labels: getLastNDays(30),
+        values: Array.from({ length: 30 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "1D": {
+        labels: [getFormattedDate(0, "day")],
+        values: [3500] // Raw value for 1 day
+    }
+};
 
-    const sixMonthsData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-        values: [2000, 2200, 2500, 2800]
-    };
+// Function to determine if the portfolio is positive or negative
+function getLineColor(values) {
+    return values[values.length - 1] > values[0] ? 'green' : 'red'; // If the last value is greater than the first, it's positive
+}
 
-    const oneMonthData = {
-        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
-        values: [2600, 2800, 3100, 3300, 3500]
-    };
-
-    const oneDayData = {
-        labels: ['Today'],
-        values: [3500]
-    };
-
-    // Create the initial Line Chart with all-time data
-    const myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: allTimeData.labels, 
-            datasets: [{
-                label: 'Portfolio Value ($)',
-                data: allTimeData.values,
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderWidth: 2,
-                pointRadius: 4,
-                pointBackgroundColor: 'white',
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'Portfolio Value ($)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time Period'
-                    }
+// Create the chart
+const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: portfolioData["ALL"].labels,
+        datasets: [{
+            label: 'Portfolio Value ($)',
+            data: portfolioData["ALL"].values,
+            borderColor: getLineColor(portfolioData["ALL"].values), // Dynamically set line color
+            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Keep background color lighter
+            borderWidth: 2,
+            pointRadius: 0, // Remove data point bubbles
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true, // Start Y-axis from the minimum value
+                suggestedMin: Math.min(...portfolioData["ALL"].values), // Start at the first data point (minimum value)
+                suggestedMax: Math.max(...portfolioData["ALL"].values) * 1.1, // Increase max value to give space for visualization
+                title: {
+                    display: true,
+                    text: 'Portfolio Value ($)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time Period'
                 }
             }
         }
-    });
-
-    // Function to update chart data based on the selected time period
-    function updateChart(timePeriod) {
-        let newData = {};
-        switch(timePeriod) {
-            case '1D':
-                newData = oneDayData;
-                break;
-            case '1M':
-                newData = oneMonthData;
-                break;
-            case '6M':
-                newData = sixMonthsData;
-                break;
-            case '1Y':
-                newData = oneYearData;
-                break;
-            case 'ALL':
-                newData = allTimeData;
-                break;
-        }
-
-        // Update the chart with new data
-        myChart.data.labels = newData.labels;
-        myChart.data.datasets[0].data = newData.values;
-        myChart.update(); // Re-render the chart with the updated data
     }
+});
+
+
+
+
+// Function to update chart data
+function updateChart(timePeriod) {
+    myChart.data.labels = portfolioData[timePeriod].labels;
+    myChart.data.datasets[0].data = portfolioData[timePeriod].values;
+    myChart.update();
+}
+
+function getFormattedDate(offset = 0, type = "day") {
+    let date = new Date();
+    
+    if (type === "month") {
+        date.setMonth(date.getMonth() - offset);
+        return date.toLocaleString('default', { month: 'short' }); // "Jan", "Feb", etc.
+    } 
+    
+    if (type === "day") {
+        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' }); // "Mar 8"
+    }
+}
+
+function getLastNDays(days) {
+    let dates = [];
+    for (let i = days - 1; i >= 0; i--) {
+        let date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date.toLocaleDateString('default', { month: 'short', day: 'numeric' })); // "Mar 1", "Mar 2"
+    }
+    return dates;
+}
+
+
+
 </script>
 
 </body>
