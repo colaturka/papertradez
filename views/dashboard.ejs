@@ -130,6 +130,52 @@ function getLastNDays(days) {
     return dates;
 }
 
+async function fetchUser() {
+  try {
+    const response = await fetch("http://localhost:5001/api/user/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}` // Include user token
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user data");
+    }
+
+    const user = await response.json();
+    updateGraphWithUser(user.cash, user.score);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+}
+
+function updateGraphWithUser(userScore) {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Set the graph to the user's unique portfolio value
+    myChart.data.labels = [today]; 
+    myChart.data.datasets[0].data = [userScore]; 
+    myChart.update();
+}
+
+
+async function fetchUserPortfolio() {
+    try {
+        const response = await fetch("http://localhost:5001/api/user"); // Replace with your API route
+        const userData = await response.json();
+
+        if (userData && userData.score !== undefined) {
+            updateGraphWithUser(userData.score);
+        }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+    }
+}
+
+
+
 
 
 </script>

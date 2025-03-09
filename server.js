@@ -67,4 +67,21 @@ app.get("/dashboard", async (req, res) => {
   res.render( "dashboard");
 });
 // Start Server
+app.get("/api/user", async (req, res) => {
+  try {
+      const userId = req.user.id;  // Ensure user authentication
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ cash: user.cash, score: user.score });
+  } catch (error) {
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
 app.listen(process.env.PORT, () => console.log(`✅ Server running on port ${process.env.PORT}`));
+
+
