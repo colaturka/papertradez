@@ -4,10 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/login.css">
-
+    <link rel="stylesheet" href="/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js Library -->
 </head>
 <body>
 <h1>Dashboard</h1>
+<div class="dashboard">
+    <div class="box1" id="box1">
+        <canvas id="myChart"></canvas>
+        <div class="buttons">
+            <button onclick="updateChart('1D')">1 Day</button>
+            <button onclick="updateChart('1M')">1 Month</button>
+            <button onclick="updateChart('6M')">6 Months</button>
+            <button onclick="updateChart('1Y')">1 Year</button>
+            <button onclick="updateChart('ALL')">All Time</button>
+        </div>
+    </div>
+    <div class="box2" id="box2">Box 2</div>
+    <div class="box3" id="box3">Box 3</div>
+</div>
+<script>
+const ctx = document.getElementById('myChart').getContext('2d');
+
+// Create a gradient background fill
+const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+gradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)');  // Light blue at top
+gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   // Transparent at bottom
+
+// Portfolio Data for different time periods
+const portfolioData = {
+    "ALL": {
+        labels: getLastNDays(365),
+        values: [1000, 1200, 1500, 1700, 1800, 2200, 2500, 2700, 3000, 3200, 3500, 3800] // Raw values
+    },
+    "1Y": {
+        labels: getLastNDays(365),
+        values: Array.from({ length: 365 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "6M": {
+        labels: getLastNDays(180),
+        values: Array.from({ length: 180 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "1M": {
+        labels: getLastNDays(30),
+        values: Array.from({ length: 30 }, () => Math.floor(Math.random() * 500 + 2500)) // Random raw values
+    },
+    "1D": {
+        labels: [getFormattedDate(0, "day")],
+        values: [3500] // Raw value for 1 day
+    }
+};
+
+// Function to determine if the portfolio is positive or negative
+function getLineColor(values) {
+    return values[values.length - 1] > values[0] ? 'green' : 'red'; // If the last value is greater than the first, it's positive
+}
+
+// Create the chart
+const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: portfolioData["ALL"].labels,
+        datasets: [{
+            label: 'Portfolio Value ($)',
+            data: portfolioData["ALL"].values,
+            borderColor: getLineColor(portfolioData["ALL"].values), // Dynamically set line color
+            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Keep background color lighter
+            borderWidth: 2,
+            pointRadius: 0, // Remove data point bubbles
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true, // Start Y-axis from the minimum value
+                suggestedMin: Math.min(...portfolioData["ALL"].values), // Start at the first data point (minimum value)
+                suggestedMax: Math.max(...portfolioData["ALL"].values) * 1.1, // Increase max value to give space for visualization
+                title: {
+                    display: true,
+                    text: 'Portfolio Value ($)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time Period'
+                }
+            }
+        }
+    }
+});
+
+
+
+
+// Function to update chart data
+function updateChart(timePeriod) {
+    myChart.data.labels = portfolioData[timePeriod].labels;
+    myChart.data.datasets[0].data = portfolioData[timePeriod].values;
+    myChart.update();
+}
+
+function getFormattedDate(offset = 0, type = "day") {
+    let date = new Date();
+    
+    if (type === "month") {
+        date.setMonth(date.getMonth() - offset);
+        return date.toLocaleString('default', { month: 'short' }); // "Jan", "Feb", etc.
+    } 
+    
+    if (type === "day") {
+        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' }); // "Mar 8"
+    }
+}
+
+function getLastNDays(days) {
+    let dates = [];
+    for (let i = days - 1; i >= 0; i--) {
+        let date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date.toLocaleDateString('default', { month: 'short', day: 'numeric' })); // "Mar 1", "Mar 2"
+    }
+    return dates;
+}
+
+async function fetchUser() {
+  try {
+    const response = await fetch("http://localhost:5001/api/user/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}` // Include user token
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user data");
+    }
+
+    const user = await response.json();
+    updateGraphWithUser(user.cash, user.score);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+}
+
+function updateGraphWithUser(userScore) {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Set the graph to the user's unique portfolio value
+    myChart.data.labels = [today]; 
+    myChart.data.datasets[0].data = [userScore]; 
+    myChart.update();
+}
+
+
+async function fetchUserPortfolio() {
+    try {
+        const response = await fetch("http://localhost:5001/api/user"); // Replace with your API route
+        const userData = await response.json();
+
+        if (userData && userData.score !== undefined) {
+            updateGraphWithUser(userData.score);
+        }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+    }
+}
+
+
+
+
+
+</script>
+
 </body>
 </html>
